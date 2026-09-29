@@ -2048,6 +2048,66 @@ The student shall be able to cancel the use case at any time prior to submitting
 **Assumptions:**
 **Open Issues:**
 
+### **UC-WAR-remind-students-submit-war: The system reminds students to submit a weekly activity report**
+
+**UC ID and Name:** UC-WAR-remind-students-submit-war: Remind students to submit a weekly activity report
+**Created By:**
+**Date Created:**
+**Primary Actor:** time-based scheduler
+**Secondary Actors:** student (recipient), Gmail SMTP service
+**Trigger:** The scheduled reminder process runs on Sunday before the Monday deadline for the preceding reporting week.
+**Description:** The system checks whether each eligible student has recorded a weekly activity report for the preceding reporting week. If a student has not recorded one, the system emails her a reminder to submit it by Monday at 10:00 a.m. CST.
+
+**Preconditions:**
+- PRE-1. Weekly reminders are enabled and the Sunday reminder process is scheduled.
+- PRE-2. The reporting week has ended, and its weekly activity report is due the following Monday at 10:00 a.m. CST (BR-war-submission-deadline).
+- PRE-3. The system can identify eligible course sections, students assigned to teams, and their activity records for the reporting week (BR-team-assignment-required).
+
+**Postconditions:**
+- POST-1. A reminder email has been sent through the configured email service for each eligible student with no activity recorded for the reporting week, or the send failure has been logged.
+- POST-2. Students with one or more activities recorded for the reporting week are not sent a reminder.
+- POST-3. The system has logged the number of reminder emails sent for each processed course section.
+
+**Main Success Scenario:**
+1. The time-based scheduler starts the Sunday reminder process.
+2. The system identifies the reporting week that ended that day and the eligible course sections and team-assigned students whose weekly activity reports are due the following Monday.
+3. The system checks each student's saved activities for the reporting week.
+4. The system finds that a student has no activity recorded for the reporting week.
+5. The system prepares an email telling the student to submit her weekly activity report by Monday at 10:00 a.m. CST.
+6. The system sends the reminder email to the student through the configured Gmail SMTP service.
+7. The email service accepts the message, and the system counts the reminder as sent.
+8. The system selects the next eligible student and returns to step 3. After all eligible students have been checked, the system continues to step 9.
+9. The system logs the number of reminder emails sent for each processed course section.
+10. Use case ends.
+
+**Extensions:**
+- **Alternative Flows:**
+  - **3a. The student has recorded one or more activities for the reporting week:**
+    - 3a1. The system does not send a reminder to the student.
+    - 3a2. The system continues with the next eligible student at step 8 of the normal flow.
+  - **2a. No eligible students require a reminder:**
+    - 2a1. The system sends no reminder emails and the use case ends.
+- **Exceptions:**
+  - **6.0.E1. The email service does not accept the reminder:**
+    - The system logs the failure for the student and continues with the next eligible student.
+  - **2.0.E2. The system cannot retrieve a course section's students or activity records:**
+    - The system logs the failure for that course section and continues processing other eligible course sections.
+
+**Priority:** High
+**Frequency of Use:** Once per week for each eligible course section.
+**Business Rules:** BR-war-submission-deadline, BR-team-assignment-required
+
+**Associated Information:**
+- Project Pulse represents a student's weekly activity report as the student's activity records for a given week; it does not have a separate WAR submission record or explicit submit action. For this use case, a WAR is treated as recorded when at least one activity is saved for the student and reporting week.
+- A successful send means the configured email service accepted the message; it does not confirm delivery to the student's inbox. The system logs successful send counts and individual failures.
+- The Sunday check evaluates activity records as they exist when the check runs. An activity saved after the check does not retract a reminder already sent.
+
+**Assumptions:**
+- CST means Central Standard Time (UTC−06:00) year-round for this deadline.
+
+**Open Issues:**
+- The SRS still describes weekly reminder days and times as configurable per course section (FR-NOT-weekly-reminder); that requirement must be reconciled with the fixed Monday 10:00 a.m. CST deadline in BR-war-submission-deadline.
+
 ### **UC-WAR-team-war-report: The instructor/student generates a WAR report of a team**
 
 **UC ID and Name:** UC-WAR-team-war-report: Generate a WAR report of a team
